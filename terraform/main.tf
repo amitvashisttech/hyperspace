@@ -1,26 +1,23 @@
-// Copyright 2017 Google Inc. All Rights Reserved.
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 provider "google" {
-  credentials = ""
-  project      = "modern-girder-157718"
-  region       = "us-central1"
-}
-
+  credentials = "/home/terrafrom07/.ssh/account.json"
+  project      = "k8s-terraform-demo-272708"
+  region       = "us-west1"
+}		
 //
 // INSTANCES
 //
+data "google_compute_zones" "us-west1" {}
+
 resource "google_compute_instance" "hyperspace-be" {
   name         = "hyperspace-be"
   machine_type = "n1-standard-1"
-  zone         = "us-central1-f"
+  zone         = "us-west1-a"
 
-  disk {
-      image = "hyperspace-be"
-  }
+ boot_disk {                        
+   initialize_params {              
+     image = "hyperspace-be"
+   }                                
+ }                                  
 
   network_interface {
       network = "default"
@@ -36,13 +33,15 @@ resource "google_compute_instance" "hyperspace-be" {
 
 resource "google_compute_instance" "hyperspace-fe" {
   name         = "${format("hyperspace-fe-%d", count.index)}"
-  machine_type = "n1-standard-1"
-  zone         = "us-central1-f"
+  machine_type = "f1-micro"
+  zone         = "${data.google_compute_zones.us-west1.names[count.index]}"
   tags         = ["hyperspace-fe"]
 
-  disk {
-      image = "hyperspace-fe"
-  }
+ boot_disk {                        
+   initialize_params {              
+     image = "hyperspace-fe"
+   }                                
+ }                                  
 
   network_interface {
       network = "default"
